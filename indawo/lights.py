@@ -5,6 +5,7 @@ Lights controller
 
 import machine
 import config
+import indawo.mqtt as mqtt
 
 
 class Light(object):
@@ -17,15 +18,18 @@ class Light(object):
         if not self.is_on():
             print('Switching {} on.'.format(self.name))
             self._light.value(0)
+            mqtt.CLIENT.publish_light(self)
 
     def off(self):
         if self.is_on():
             print('Switching {} off.'.format(self.name))
             self._light.value(1)
+            mqtt.CLIENT.publish_light(self)
 
     def toggle(self):
         self._light.value(not self._light.value())
         print('Toggling {} to {}'.format(self.name, 'on' if self.is_on() else 'off'))
+        mqtt.CLIENT.publish_light(self)
 
     def is_on(self):
         return not self._light.value()

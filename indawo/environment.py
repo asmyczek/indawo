@@ -10,6 +10,7 @@ import machine
 import onewire
 import ds18x20
 import uasyncio
+import indawo.mqtt as mqtt
 
 
 PIN_S_MAIN = machine.Pin(config.PIN_S_MAIN)
@@ -37,6 +38,7 @@ class Environment(object):
         except OSError:
             self._s_main_connected = False
             print('Main sensor not connected!')
+            mqtt.CLIENT.publish_error('Main sensor not connected.')
 
         try:
             self._s_temp_connected = True
@@ -44,6 +46,7 @@ class Environment(object):
         except onewire.OneWireError:
             self._s_temp_connected = False
             print('Temp sensors not connected!')
+            mqtt.CLIENT.publish_error('Temp sensor not connected.')
 
         time.sleep(1)
 
@@ -60,6 +63,8 @@ class Environment(object):
         else:
             self._state['temperature_base'] = 0.0
             self._state['temperature_basking'] = 0.0
+
+        mqtt.CLIENT.publish_environment(self._state)
 
     def main_temperature(self):
         return self._state['temperature_main']

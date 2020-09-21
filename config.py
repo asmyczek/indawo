@@ -18,3 +18,9 @@ PIN_L_NIGHT = 16  # D2
 
 S_TEMP_BASKING = [40, 166, 96, 8, 33, 25, 1, 194]
 S_TEMP_BASE = [40, 50, 108, 7, 33, 25, 1, 20]
+
+# MQTT config
+MQTT_HOST = '<mqtt host>'
+MQTT_PORT = 1883
+MQTT_USER = '<mqtt user>'
+MQTT_PASSWORD = '<mqtt pass>'

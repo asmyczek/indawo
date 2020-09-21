@@ -6,6 +6,8 @@ Button controller
 import machine
 import uasyncio
 import indawo.lights as lights
+import indawo.mqtt as mqtt
+
 
 PIN_BUTTONS = adc = machine.ADC(0)
 
@@ -31,6 +33,7 @@ class Button(object):
             print('Button {} triggered.'.format(self.name))
             self._trigger()
             self._state = False
+            mqtt.CLIENT.publish_button_trigger(self)
             return True
         else:
             return False
