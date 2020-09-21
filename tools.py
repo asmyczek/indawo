@@ -9,7 +9,7 @@ Howto:
 """
 
 import machine
-from indawo.lights import MAIN_LIGHT, BASKING_LIGHT, NIGHT_LIGHT
+from indawo.lights import LIGHTS, MAIN_LIGHT, BASKING_LIGHT, NIGHT_LIGHT
 from indawo.environment import ENVIRONMENT
 
 
@@ -20,9 +20,8 @@ def environment_stats():
 
 
 def lights_status():
-    MAIN_LIGHT.print_status()
-    BASKING_LIGHT.print_status()
-    NIGHT_LIGHT.print_status()
+    for light in LIGHTS.values():
+        light.print_status()
 
 
 def reboot():

@@ -12,6 +12,7 @@ class Client(object):
 
     def __init__(self):
         self._client = self._create_client()
+        self._lights_callback = None
 
     def _create_client(self):
         try:
@@ -28,8 +29,27 @@ class Client(object):
             print(e)
             return None
 
+    def set_lights_callback(self, callback):
+        self._lights_callback = callback
+
     def on_message(self, topic, msg):
         print('{} - {}'.format(topic, msg))
+        path = topic.split('/')
+        if path[1] == 'light' and self._lights_callback:
+            light = self._lights_callback(path[2])
+            if light:
+                if msg == 'on':
+                    light.on()
+                elif msg == 'off':
+                    light.off()
+                else:
+                    emsg = 'Invalid light state {}. Expecting on or off.'.format(msg)
+                    print(emsg)
+                    self.publish_error(emsg)
+            else:
+                emsg = 'Invalid light name {}.'.format(path[2])
+                print(emsg)
+                self.publish_error(emsg)
 
     def publish_environment(self, stats):
         if self._client:

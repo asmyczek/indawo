@@ -38,6 +38,14 @@ class Light(object):
         print('{} is {}'.format(self.name, 'on' if self.is_on() else 'off'))
 
 
-MAIN_LIGHT = Light('MAIN_LIGHT', config.PIN_L_MAIN)
-BASKING_LIGHT = Light('BASKING_LIGHT', config.PIN_L_BASKING)
-NIGHT_LIGHT = Light('NIGHT_LIGHT', config.PIN_L_NIGHT)
+MAIN_LIGHT = Light('MAIN', config.PIN_L_MAIN)
+BASKING_LIGHT = Light('BASKING', config.PIN_L_BASKING)
+NIGHT_LIGHT = Light('NIGHT', config.PIN_L_NIGHT)
+
+LIGHTS = {
+    'MAIN': MAIN_LIGHT,
+    'BASKING': BASKING_LIGHT,
+    'NIGHT': NIGHT_LIGHT
+}
+
+mqtt.CLIENT.set_lights_callback(lambda name: LIGHTS.get(name.upper(), None))
