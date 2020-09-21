@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Button controller
+"""
+
 import machine
 import uasyncio
 import indawo.lights as lights
@@ -23,6 +28,7 @@ class Button(object):
 
     def trigger(self):
         if self._state:
+            print('Button {} triggered.'.format(self.name))
             self._trigger()
             self._state = False
             return True
@@ -36,14 +42,12 @@ BUTTONS = [
     Button('NIGHT_LIGHT', 710, 720, lights.NIGHT_LIGHT.toggle)
 ]
 
-ANALOG_LEVEL = 1024
-
 
 async def process_buttons(trigger_callback):
-    global ANALOG_LEVEL
+    last_analog_level = 1024
     while True:
         analog_level = PIN_BUTTONS.read()
-        if analog_level != ANALOG_LEVEL:
+        if analog_level != last_analog_level:
             for button in BUTTONS:
                 if analog_level < 1024:
                     button.try_on(analog_level)
@@ -51,5 +55,5 @@ async def process_buttons(trigger_callback):
                     if button.trigger():
                         trigger_callback(button)
 
-        ANALOG_LEVEL = analog_level
+        last_analog_level = analog_level
         await uasyncio.sleep_ms(100)

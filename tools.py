@@ -1,4 +1,13 @@
-# Set of monitoring commands and actions for repl
+# -*- coding: utf-8 -*-
+"""
+REPL tools
+
+Howto:
+- Login to REPL or WEB_REPL
+- Type CTRL-C to stop main loop
+- import tools
+"""
+
 import machine
 from indawo.lights import MAIN_LIGHT, BASKING_LIGHT, NIGHT_LIGHT
 from indawo.environment import ENVIRONMENT
@@ -11,9 +20,9 @@ def environment_stats():
 
 
 def lights_status():
-    print('Main light: {}'.format('on' if MAIN_LIGHT.is_on() else 'off'))
-    print('Basking light: {}'.format('on' if BASKING_LIGHT.is_on() else 'off'))
-    print('Night light: {}'.format('on' if NIGHT_LIGHT.is_on() else 'off'))
+    MAIN_LIGHT.print_status()
+    BASKING_LIGHT.print_status()
+    NIGHT_LIGHT.print_status()
 
 
 def reboot():

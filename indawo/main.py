@@ -1,6 +1,7 @@
-# http://www.ignorantofthings.com/2018/07/the-perfect-multi-button-input-resistor.html
-# https://lastminuteengineers.com/esp8266-dht11-dht22-web-server-tutorial/
-
+# -*- coding: utf-8 -*-
+"""
+Main terrarium controller
+"""
 
 import indawo.environment as environment
 import indawo.buttons as buttons
@@ -9,6 +10,7 @@ import uasyncio
 import machine
 import utime
 import config
+import time
 
 
 MANUAL_CONTROL = False
@@ -17,19 +19,32 @@ MANUAL_CONTROL = False
 async def controller():
     while True:
         if not MANUAL_CONTROL:
-            y, m, d, w, h, m, s, ms = utime.localtime()
+            y, m, d, h, m, s, ms, tz = utime.localtime()
             is_day = config.DAY_HOURS[0] <= h + 2 < config.DAY_HOURS[1]
-            if is_day:
-                lights.MAIN_LIGHT.on()
-                if environment.ENVIRONMENT.basking_temperature() < 32:
-                    lights.BASKING_LIGHT.on()
-                if environment.ENVIRONMENT.basking_temperature() > 38:
+            if environment.ENVIRONMENT.main_sensor_connected() and \
+                    environment.ENVIRONMENT.temp_sensor_connected():
+                if is_day:
+                    lights.MAIN_LIGHT.on()
+                    lights.NIGHT_LIGHT.off()
+                    if environment.ENVIRONMENT.basking_temperature() < 32:
+                        lights.BASKING_LIGHT.on()
+                    if environment.ENVIRONMENT.basking_temperature() > 38:
+                        lights.BASKING_LIGHT.off()
+                else:
+                    lights.MAIN_LIGHT.off()
                     lights.BASKING_LIGHT.off()
+                    if environment.ENVIRONMENT.main_temperature() < 20:
+                        lights.NIGHT_LIGHT.on()
+                    if environment.ENVIRONMENT.main_temperature() > 24:
+                        lights.NIGHT_LIGHT.off()
             else:
-                lights.MAIN_LIGHT.off()
-                if environment.ENVIRONMENT.main_temperature() < 20:
-                    lights.NIGHT_LIGHT.on()
-                if environment.ENVIRONMENT.main_temperature() > 24:
+                if is_day:
+                    lights.MAIN_LIGHT.on()
+                    lights.BASKING_LIGHT.off()
+                    lights.NIGHT_LIGHT.off()
+                else:
+                    lights.MAIN_LIGHT.off()
+                    lights.BASKING_LIGHT.off()
                     lights.NIGHT_LIGHT.off()
 
         await uasyncio.sleep(60)
@@ -63,9 +78,15 @@ def button_trigger_callback(button):
 def start_service():
     print('Starting Indawo service.')
     print('Time: {}'.format(machine.RTC().datetime()))
+    lights.MAIN_LIGHT.print_status()
+    lights.BASKING_LIGHT.print_status()
+    lights.NIGHT_LIGHT.print_status()
+
     loop = uasyncio.get_event_loop()
-    loop.create_task(buttons.process_buttons(button_trigger_callback))
     loop.create_task(environment.check_environment())
+    time.sleep(3)
+    loop.create_task(controller())
+    loop.create_task(buttons.process_buttons(button_trigger_callback))
     try:
         loop.run_forever()
     except Exception as e:
