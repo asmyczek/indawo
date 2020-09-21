@@ -1,2 +1,3 @@
-# indawo
-Indawo
+# Indawo
+
+NodeMCU terrarium controller.
