@@ -4,7 +4,7 @@ MQTT client and APIs
 """
 
 from umqtt.robust import MQTTClient
-from ujson import loads, dumps
+from ujson import dumps
 import config
 
 
@@ -37,7 +37,8 @@ class Client(object):
 
     def publish_light(self, light):
         if self._client:
-            self._client.publish(topic='terrarium/light/{}/status'.format(light.name), msg=light.is_on())
+            self._client.publish(topic='terrarium/light/{}/status'.format(light.name),
+                                 msg='on' if light.is_on() else 'off')
 
     def publish_button_trigger(self, button):
         if self._client:

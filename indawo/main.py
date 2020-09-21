@@ -97,6 +97,7 @@ def start_service():
         mqtt.CLIENT.publish_status('INTERRUPTED')
         mqtt.CLIENT.publish_error(e)
         print(e)
-    print('Stopped Indawo service.')
-    mqtt.CLIENT.publish_status('STOPPED')
+    finally:
+        print('Indawo service stopped.')
+        mqtt.CLIENT.publish_status('STOPPED')
 
