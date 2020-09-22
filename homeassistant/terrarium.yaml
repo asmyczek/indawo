@@ -1,0 +1,64 @@
+# ---------------------------------------------
+# Homeassistant config for terrarium monitoring
+# ---------------------------------------------
+
+# -------
+# Sensors
+# -------
+
+sensor:
+  - platform: mqtt
+    name: "Terrarium Environment Stats"
+    state_topic: "stats/terrarium/environment/stats"
+    value_template: "{{ value_json.connected }}"
+    json_attributes_topic: "stats/terrarium/environment/stats"
+    json_attributes_template: "{{ value_json.stats | tojson }}"
+    force_update: true
+
+  - platform: mqtt
+    name: "Terrarium Main Light"
+    state_topic: "stats/terrarium/light/main/power"
+    force_update: true
+
+  - platform: mqtt
+    name: "Terrarium Basking Light"
+    state_topic: "stats/terrarium/light/basking/power"
+    force_update: true
+
+  - platform: mqtt
+    name: "Terrarium Night Light"
+    state_topic: "stats/terrarium/light/night/power"
+    force_update: true
+
+  - platform: mqtt
+    name: "Terrarium Error Messages"
+    state_topic: "info/terrarium/error"
+    force_update: true
+
+# ----------
+# Automation
+# ----------
+automation:
+
+    # Update terrarium light status
+    - service: mqtt.publish
+      data:
+        topic: "cmnd/terrarium/light/main/power"
+    - service: mqtt.publish
+      data:
+        topic: "cmnd/terrarium/light/basking/power"
+    - service: mqtt.publish
+      data:
+        topic: "cmnd/terrarium/light/night/power"
+
+    # Write terrarium mqtt errors to log
+    - alias: Log Terrarium Errors
+      trigger:
+        platform: mqtt
+        topic: "info/terrarium/error"
+      action:
+        service: system_log.write
+        data_template:
+          message: "Terrarium error: {{ trigger.payload }}"
+          level: error
+
