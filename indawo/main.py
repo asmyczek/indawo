@@ -58,7 +58,7 @@ async def switch_to_auto_mode():
     await uasyncio.sleep(config.MANUAL_CONTROL_OVERRIDE_TIME * 60)
     global MANUAL_CONTROL
     print('Switching to automated control mode.')
-    mqtt.CLIENT.publish_status('AUTO_MODE')
+    mqtt.CLIENT.publish_mode('AUTO_MODE')
     CONTROL_LOCK.acquire()
     MANUAL_CONTROL = False
     if CONTROL_LOCK.locked():
@@ -70,7 +70,7 @@ def button_trigger_callback(button):
     CONTROL_LOCK.acquire()
     if not MANUAL_CONTROL:
         print('Switching to manual control mode.')
-        mqtt.CLIENT.publish_status('MANUAL_MODE')
+        mqtt.CLIENT.publish_mode('MANUAL_MODE')
         MANUAL_CONTROL = True
         loop = uasyncio.get_event_loop()
         loop.create_task(switch_to_auto_mode())
@@ -84,13 +84,18 @@ def start_service():
     lights.MAIN_LIGHT.print_status()
     lights.BASKING_LIGHT.print_status()
     lights.NIGHT_LIGHT.print_status()
-    mqtt.CLIENT.publish_status('STARTED')
 
     loop = uasyncio.get_event_loop()
+    loop.create_task(mqtt.start_mqtt_client())
     loop.create_task(environment.check_environment())
     time.sleep(3)
     loop.create_task(controller())
     loop.create_task(buttons.process_buttons(button_trigger_callback))
+
+    mqtt.CLIENT.publish_light(lights.MAIN_LIGHT)
+    mqtt.CLIENT.publish_light(lights.BASKING_LIGHT)
+    mqtt.CLIENT.publish_light(lights.NIGHT_LIGHT)
+
     try:
         loop.run_forever()
     except Exception as e:
@@ -99,5 +104,4 @@ def start_service():
         print(e)
     finally:
         print('Indawo service stopped.')
-        mqtt.CLIENT.publish_status('STOPPED')
 

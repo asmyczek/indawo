@@ -35,7 +35,7 @@ class Light(object):
         return not self._light.value()
 
     def print_status(self):
-        print('{} is {}'.format(self.name, 'on' if self.is_on() else 'off'))
+        print('{} light is {}'.format(self.name, 'on' if self.is_on() else 'off'))
 
 
 MAIN_LIGHT = Light('MAIN', config.PIN_L_MAIN)
@@ -49,3 +49,4 @@ LIGHTS = {
 }
 
 mqtt.CLIENT.set_lights_callback(lambda name: LIGHTS.get(name.upper(), None))
+

@@ -64,7 +64,7 @@ class Environment(object):
             self._state['temperature_base'] = 0.0
             self._state['temperature_basking'] = 0.0
 
-        mqtt.CLIENT.publish_environment(self._state)
+        mqtt.CLIENT.publish_environment(self._s_main_connected and self._s_temp_connected, self._state)
 
     def main_temperature(self):
         return self._state['temperature_main']
@@ -95,3 +95,4 @@ async def check_environment():
     while True:
         ENVIRONMENT.measure()
         await uasyncio.sleep(60)
+
